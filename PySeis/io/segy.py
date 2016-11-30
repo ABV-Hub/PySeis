@@ -203,8 +203,7 @@ def read_traces(_file, ns):
             header = np.fromstring(chunk, dtype=segy_trace_header_dtype).byteswap()
             data = ibm2ieee(np.fromfile(f, dtype='>i4', count=ns))
             append_fields(header, 'trace', data=data)
-            return header
-            #trace = merge_arrays((header, data), asrecarray=True, flatten=True)
+            yield header
             
 def read_segy(_file):
     EBCDIC = read_EBCDIC(_file)
@@ -213,7 +212,12 @@ def read_segy(_file):
     dt = np.unique(bheader['hdt'])
     assert len(ns) == 1
     assert len(dt) == 1
-    tdata = read_traces(_file, ns)
+    holder = []
+    for trace in read_traces(_file, ns):
+        holder.append(trace)
+    data = np.array(holder)
+    return data
+
 
 
 
